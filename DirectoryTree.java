@@ -41,6 +41,20 @@ public class DirectoryTree {
 	}
 
 	/**
+	 * @return The workingDirectory of this instance
+	 */
+	public String presentWorkingDirectory() {
+		return workingDirectory;
+	}
+
+	/**
+	 * @param workingDirectory The new workingDirectory to set
+	 */
+	public void setWorkingDirectory(String workingDirectory) {
+		this.workingDirectory = workingDirectory;
+	}
+
+	/**
 	 * Returns an instance of DirectoryTree
 	 * 
 	 * <dl>
@@ -65,6 +79,7 @@ public class DirectoryTree {
 	 */
 	public void resetCursor() {
 		cursor = root;
+		workingDirectory = "root";
 	}
 
 	/**
@@ -85,6 +100,7 @@ public class DirectoryTree {
 		int index = cursor.getChildIndex(name);
 		if (index != -1) {
 			cursor = cursor.getChildren()[index];
+			workingDirectory += "/" + cursor.getName();
 		} else {
 			throw new UnresolvedPathException("There is no such child.");
 		}
@@ -102,5 +118,81 @@ public class DirectoryTree {
 		for (int i = 0; i < pathArray.length; i++) {
 			goToChild(pathArray[i]);
 		}
+	}
+
+	/**
+	 * Moves the cursor up to its parent directory. If the cursor is at the root,
+	 * this does nothing.
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>The cursor now points to the parent directory, if it exists. The working
+	 * directory has been updated.</dd>
+	 * </dl>
+	 */
+	public void goToParent() {
+		cursor = cursor.getParent();
+		workingDirectory = workingDirectory.replaceAll("/[A-Za-z0-9]*$", "");
+	}
+
+	/**
+	 * Creates a new directory with the specified name.
+	 * 
+	 * <dl>
+	 * <dt>Preconditions:</dt>
+	 * <dd>'name' is a legal argument (does not contain spaces " " or forward
+	 * slashes "/")</dd>
+	 * </dl>
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>A new directory has been added to the children of the cursor, or an
+	 * exception has been thrown.</dd>
+	 * </dl>
+	 * 
+	 * @param name The name of the new directory
+	 * @throws IllegalArgumentException If the name contains any white space or '/'
+	 *                                  characters.
+	 * @throws FullDirectoryException   If the cursor does not have more room for a
+	 *                                  directory.
+	 * @throws NotADirectoryException   If the cursor is not a directory.
+	 */
+	public void makeDirectory(String name)
+			throws IllegalArgumentException, FullDirectoryException, NotADirectoryException {
+		name = name.trim();
+		if (name.indexOf("/") != -1 || name.indexOf(" ") != -1) {
+			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
+		}
+		cursor.addChild(new DirectoryNode(name, false));
+	}
+
+	/**
+	 * Creates a new file with the specified name.
+	 * 
+	 * <dl>
+	 * <dt>Preconditions:</dt>
+	 * <dd>'name' is a legal argument (does not contain spaces " " or forward
+	 * slashes "/")</dd>
+	 * </dl>
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>A new file has been added to the children of the cursor, or an exception
+	 * has been thrown.</dd>
+	 * </dl>
+	 * 
+	 * @param name The name of the new file
+	 * @throws IllegalArgumentException If the name contains any white space or '/'
+	 *                                  characters.
+	 * @throws FullDirectoryException   If the cursor does not have more room for a
+	 *                                  file.
+	 * @throws NotADirectoryException   If the cursor is not a directory.
+	 */
+	public void makeFile(String name) throws IllegalArgumentException, FullDirectoryException, NotADirectoryException {
+		name = name.trim();
+		if (name.indexOf("/") != -1 || name.indexOf(" ") != -1) {
+			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
+		}
+		cursor.addChild(new DirectoryNode(name, true));
 	}
 }

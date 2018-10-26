@@ -10,6 +10,7 @@ public class DirectoryNode {
 	private final static int MAX_CHILDREN = 10; // Max amount of children per node
 	private String name; // Name of the node
 	private DirectoryNode[] children; // Array of children
+	private DirectoryNode parent; // The parent of this node
 	private int childrenCount; // Number of children
 	private boolean isFile; // True if node is file, false otherwise
 
@@ -70,6 +71,20 @@ public class DirectoryNode {
 	}
 
 	/**
+	 * @return The parent of this instance
+	 */
+	public DirectoryNode getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent The new parent to set
+	 */
+	public void setParent(DirectoryNode parent) {
+		this.parent = parent;
+	}
+
+	/**
 	 * Adds the specified node as a child to the first available position in
 	 * <code>children</code>.
 	 * 
@@ -86,16 +101,17 @@ public class DirectoryNode {
 	 * </dl>
 	 * 
 	 * @param node The node to add
-	 * @throws UnresolvedPathException if this instance of DirectoryNode is a file
-	 * @throws NotADirectoryException if this instance of DirectoryNode is full
+	 * @throws NotADirectoryException if this instance of DirectoryNode is a file
+	 * @throws FullDirectoryException if this instance of DirectoryNode is full
 	 */
-	public void addChild(DirectoryNode node) throws UnresolvedPathException, NotADirectoryException {
+	public void addChild(DirectoryNode node) throws NotADirectoryException, FullDirectoryException {
 		if (childrenCount == MAX_CHILDREN) {
-			throw new UnresolvedPathException("No more children can be added to this node.");
+			throw new FullDirectoryException("No more children can be added to this node.");
 		} else if (isFile) {
 			throw new NotADirectoryException("A file cannot have children.");
 		}
 		children[childrenCount] = node;
+		node.setParent(this);
 		childrenCount += 1;
 	}
 
@@ -126,12 +142,14 @@ public class DirectoryNode {
 	public DirectoryNode() {
 		this.children = new DirectoryNode[MAX_CHILDREN];
 		this.childrenCount = 0;
+		this.parent = null;
 	}
 
 	/**
 	 * Returns an instance of DirectoryNode
 	 * 
 	 * @param name   Name of node
+	 * @param parent The parent of this node
 	 * @param isFile True if node is a file, false otherwise
 	 */
 	public DirectoryNode(String name, boolean isFile) {
