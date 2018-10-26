@@ -64,7 +64,7 @@ public class DirectoryTree {
 	 * </dl>
 	 */
 	public DirectoryTree() {
-		root = new DirectoryNode("root", true);
+		root = new DirectoryNode("root", false);
 		cursor = root;
 		workingDirectory = "root";
 	}
@@ -194,5 +194,20 @@ public class DirectoryTree {
 			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
 		}
 		cursor.addChild(new DirectoryNode(name, true));
+	}
+
+	/**
+	 * Returns a string listing all the children of the cursor. Names are separated
+	 * by spaces " ".
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>The cursor remains at its original location.</dd>
+	 * </dl>
+	 * 
+	 * @returns A formatted string of directory names
+	 */
+	public String listDirectory() {
+		return String.join(" ", cursor.getChildrenNames()).replaceAll(" null", "");
 	}
 }

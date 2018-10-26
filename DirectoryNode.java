@@ -10,6 +10,7 @@ public class DirectoryNode {
 	private final static int MAX_CHILDREN = 10; // Max amount of children per node
 	private String name; // Name of the node
 	private DirectoryNode[] children; // Array of children
+	private String[] childrenNames; // Array of children Names
 	private DirectoryNode parent; // The parent of this node
 	private int childrenCount; // Number of children
 	private boolean isFile; // True if node is file, false otherwise
@@ -43,6 +44,34 @@ public class DirectoryNode {
 	}
 
 	/**
+	 * @return The childrenNames of this instance
+	 */
+	public String[] getChildrenNames() {
+		return childrenNames;
+	}
+
+	/**
+	 * @param childrenNames The new childrenNames to set
+	 */
+	public void setChildrenNames(String[] childrenNames) {
+		this.childrenNames = childrenNames;
+	}
+
+	/**
+	 * @return The parent of this instance
+	 */
+	public DirectoryNode getParent() {
+		return parent;
+	}
+
+	/**
+	 * @param parent The new parent to set
+	 */
+	public void setParent(DirectoryNode parent) {
+		this.parent = parent;
+	}
+
+	/**
 	 * @return The childrenCount of this instance
 	 */
 	public int getChildrenCount() {
@@ -68,20 +97,6 @@ public class DirectoryNode {
 	 */
 	public void setFile(boolean isFile) {
 		this.isFile = isFile;
-	}
-
-	/**
-	 * @return The parent of this instance
-	 */
-	public DirectoryNode getParent() {
-		return parent;
-	}
-
-	/**
-	 * @param parent The new parent to set
-	 */
-	public void setParent(DirectoryNode parent) {
-		this.parent = parent;
 	}
 
 	/**
@@ -111,6 +126,7 @@ public class DirectoryNode {
 			throw new NotADirectoryException("A file cannot have children.");
 		}
 		children[childrenCount] = node;
+		childrenNames[childrenCount] = node.getName();
 		node.setParent(this);
 		childrenCount += 1;
 	}
@@ -140,7 +156,8 @@ public class DirectoryNode {
 	 * Returns an instance of DirectoryNode
 	 */
 	public DirectoryNode() {
-		this.children = new DirectoryNode[MAX_CHILDREN];
+		this.children = null;
+		this.childrenNames = null;
 		this.childrenCount = 0;
 		this.parent = null;
 	}
@@ -156,6 +173,10 @@ public class DirectoryNode {
 		this();
 		this.name = name;
 		this.isFile = isFile;
+		if (!isFile) {
+			this.children = new DirectoryNode[MAX_CHILDREN];
+			this.childrenNames = new String[MAX_CHILDREN];
+		}
 	}
 
 }

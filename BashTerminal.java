@@ -9,8 +9,6 @@ package fileDirectory;
  **/
 public class BashTerminal {
 	public static void main(String[] args) {
-		String workingDirectory = "root/test/test1/javascriptStuff/two";
-		workingDirectory = workingDirectory.replaceAll("/[A-Za-z0-9]*$", "");
-		System.out.println(workingDirectory);
+
 	}
 }
