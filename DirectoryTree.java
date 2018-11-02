@@ -37,7 +37,6 @@ public class DirectoryTree {
 	 */
 	public void setCursor(DirectoryNode cursor) {
 		this.cursor = cursor;
-		workingDirectory = "root";
 	}
 
 	/**
@@ -194,6 +193,55 @@ public class DirectoryTree {
 			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
 		}
 		cursor.addChild(new DirectoryNode(name, true));
+	}
+
+	/**
+	 * Prints out the directory tree of the current node using recursive pre-order
+	 * tree traversal.
+	 * 
+	 * @param node  The node to start from.
+	 * @param depth The depth of the node.
+	 */
+	public void printDirectoryTree(DirectoryNode node, int depth) {
+		// Print out the name of current node
+		String indents = "";
+		for (int i = 0; i < depth; i++) {
+			indents += "    ";
+		}
+		System.out.println(indents + (node.isFile() ? " " : "|") + "- " + node.getName());
+		if (!node.isFile()) {
+			// Advance to children nodes
+			DirectoryNode[] children = node.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				if (children[i] != null)
+					printDirectoryTree(children[i], depth + 1);
+			}
+		}
+	}
+
+	/**
+	 * Prints out the directory tree that has the current cursor as its root.
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>The tree starting from the current path has been printed to the
+	 * user.</dd>
+	 * </dl>
+	 */
+	public void printDirectoryTree() {
+		printDirectoryTree(cursor, 0);
+	}
+
+	/**
+	 * Prints out the entire directory tree.
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>The tree starting from the root has been printed to the user.</dd>
+	 * </dl>
+	 */
+	public void printDirectoryTreeFromRoot() {
+		printDirectoryTree(root, 0);
 	}
 
 	/**
