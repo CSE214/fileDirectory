@@ -1,8 +1,8 @@
 package fileDirectory;
 
 /**
- * <code>FullDirectoryException</code> is thrown when the current
- * <code>DirectoryNode</code> is full and cannot have more children.
+ * <code>NotADirectoryException</code> is thrown when the user attempts to move
+ * to node that is not a directory.
  *
  * @author Sayan Sivakumaran e-mail: sayan.sivakumaran@stonybrook.edu Stony
  *         Brook ID: 110261379

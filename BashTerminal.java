@@ -74,6 +74,8 @@ public class BashTerminal {
 			System.out.println("This directory is already full.");
 		} catch (IllegalArgumentException e) {
 			System.out.println("That is not a valid file name.");
+		} catch (ConflictingNamesException e) {
+			System.out.println("There cannot be two directories or two files with the same name.");
 		}
 	}
 
@@ -96,6 +98,8 @@ public class BashTerminal {
 			System.out.println("This directory is already full.");
 		} catch (IllegalArgumentException e) {
 			System.out.println("That is not a valid file name.");
+		} catch (ConflictingNamesException e) {
+			System.out.println("There cannot be two directories or two files with the same name.");
 		}
 	}
 
@@ -125,6 +129,52 @@ public class BashTerminal {
 	}
 
 	/**
+	 * Moves the cursor up one level to the parent directory.
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>The cursor now points to the parent, and the user is prompted for another
+	 * command.</dd>
+	 * </dl>
+	 */
+	private static void moveToParent() {
+		directoryTree.goToParent();
+	}
+
+	/**
+	 * Moves the cursor through the specified path.
+	 * 
+	 * <dl>
+	 * <dt>Postconditions:</dt>
+	 * <dd>If the path is valid, the cursor moves through the path, and the user is
+	 * prompted for another command.</dd>
+	 * </dl>
+	 */
+	private static void moveToDirectory(String path) {
+		try {
+			directoryTree.changeDirectory(path);
+		} catch (UnresolvedPathException e) {
+			System.out.println("ERROR: '" + path + "' cannot be found.");
+		} catch (NotADirectoryException e) {
+			System.out.println("ERROR: '" + path + "' is not a directory.");
+		}
+	}
+
+	private static void moveDirectory(String sourcePath, String targetPath) {
+		try {
+			directoryTree.moveDirectory(sourcePath, targetPath);
+		} catch (UnresolvedPathException e) {
+			System.out.println("The source or target path is invalid.");
+		} catch (NotADirectoryException e) {
+			System.out.println("The target path does not resolve to a directory.");
+		} catch (FullDirectoryException e) {
+			System.out.println("The directory at the target path is already full.");
+		} catch (ConflictingNamesException e) {
+			System.out.println("There cannot be two directories or two files with the same name.");
+		}
+	}
+
+	/**
 	 * Parses the input from the user.
 	 * 
 	 * <dl>
@@ -137,24 +187,34 @@ public class BashTerminal {
 		switch (command) {
 		case "pwd":
 			printWorkingDirectory();
+			break;
 		case "ls":
 			listDirectory();
+			break;
 		case "ls -R":
 			listDirectoryFromRoot();
+			break;
 		case "cd /":
 			moveToRoot();
+			break;
+		case "cd ..":
+			moveToParent();
+			break;
 		case "exit":
 			System.out.println("Program terminating normally");
 			System.exit(0);
 			// Handle regex matching here
 		default:
-			if (command.matches("touch\\s+[^/]+")) {
+			if (command.matches("touch\\s+[^/\\s]+")) {
 				makeFile(command.split(" ")[1].trim());
-			} else if (command.matches("mkdir\\s+[^/]+")) {
+			} else if (command.matches("mkdir\\s+[^/\\s]+")) {
 				makeDirectory(command.split(" ")[1].trim());
+			} else if (command.matches("cd\\s+[^\\s]+")) {
+				moveToDirectory(command.split(" ")[1].trim());
+			} else if (command.matches("mv\\s+[^\\s]+\\s+[^\\s]+")) {
+				moveDirectory(command.split(" ")[1].trim(), command.split(" ")[2].trim());
 			} else {
 				System.out.println("That is not a valid command.");
-				getUserInput();
 			}
 		}
 		getUserInput();

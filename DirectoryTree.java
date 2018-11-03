@@ -91,13 +91,16 @@ public class DirectoryTree {
 	 * </dl>
 	 * 
 	 * @param name The name of the node to go to
-	 * @throws NotADirectoryException  If the current cursor is not a directory
+	 * @throws NotADirectoryException  If the target is not a directory
 	 * @throws UnresolvedPathException If the child cannot be found
 	 * 
 	 */
 	public void goToChild(String name) throws NotADirectoryException, UnresolvedPathException {
 		int index = cursor.getChildIndex(name);
 		if (index != -1) {
+			if (cursor.getChildren()[index].isFile()) {
+				throw new NotADirectoryException("You cannot move to a file.");
+			}
 			cursor = cursor.getChildren()[index];
 			workingDirectory += "/" + cursor.getName();
 		} else {
@@ -114,8 +117,17 @@ public class DirectoryTree {
 	 */
 	public void changeDirectory(String path) throws NotADirectoryException, UnresolvedPathException {
 		String[] pathArray = path.split("/");
+		DirectoryNode originalCursor = cursor;
 		for (int i = 0; i < pathArray.length; i++) {
-			goToChild(pathArray[i]);
+			try {
+				goToChild(pathArray[i]);
+			} catch (UnresolvedPathException e) {
+				cursor = originalCursor;
+				throw new UnresolvedPathException("The path is invalid.");
+			} catch (NotADirectoryException e) {
+				cursor = originalCursor;
+				throw new NotADirectoryException("You cannot move to a file.");
+			}
 		}
 	}
 
@@ -150,14 +162,15 @@ public class DirectoryTree {
 	 * </dl>
 	 * 
 	 * @param name The name of the new directory
-	 * @throws IllegalArgumentException If the name contains any white space or '/'
-	 *                                  characters.
-	 * @throws FullDirectoryException   If the cursor does not have more room for a
-	 *                                  directory.
-	 * @throws NotADirectoryException   If the cursor is not a directory.
+	 * @throws IllegalArgumentException  If the name contains any white space or '/'
+	 *                                   characters.
+	 * @throws FullDirectoryException    If the cursor does not have more room for a
+	 *                                   directory.
+	 * @throws ConflictingNamesException If a directory with the same name already
+	 *                                   exists
 	 */
 	public void makeDirectory(String name)
-			throws IllegalArgumentException, FullDirectoryException, NotADirectoryException {
+			throws IllegalArgumentException, FullDirectoryException, NotADirectoryException, ConflictingNamesException {
 		name = name.trim();
 		if (name.indexOf("/") != -1 || name.indexOf(" ") != -1) {
 			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
@@ -181,18 +194,78 @@ public class DirectoryTree {
 	 * </dl>
 	 * 
 	 * @param name The name of the new file
-	 * @throws IllegalArgumentException If the name contains any white space or '/'
-	 *                                  characters.
-	 * @throws FullDirectoryException   If the cursor does not have more room for a
-	 *                                  file.
-	 * @throws NotADirectoryException   If the cursor is not a directory.
+	 * @throws IllegalArgumentException  If the name contains any white space or '/'
+	 *                                   characters.
+	 * @throws FullDirectoryException    If the cursor does not have more room for a
+	 *                                   file.
+	 * @throws ConflictingNamesException If a file with the same name already exists
 	 */
-	public void makeFile(String name) throws IllegalArgumentException, FullDirectoryException, NotADirectoryException {
+	public void makeFile(String name)
+			throws IllegalArgumentException, FullDirectoryException, NotADirectoryException, ConflictingNamesException {
 		name = name.trim();
 		if (name.indexOf("/") != -1 || name.indexOf(" ") != -1) {
 			throw new IllegalArgumentException("File name should not have whitespace or '/' characters.");
 		}
 		cursor.addChild(new DirectoryNode(name, true));
+	}
+
+	/**
+	 * Moves the node located at sourcePath to targetPath
+	 * 
+	 * @param sourcePath The source of the node
+	 * @param targetPath The destination of the node
+	 * 
+	 * @throws NotADirectoryException    If the targetPath does not resolve to a
+	 *                                   directory.
+	 * @throws UnresolvedPathException   If the sourcePath or targetPath are
+	 *                                   invalid.
+	 * @throws FullDirectoryException    If the directory at targetPath is already
+	 *                                   full.
+	 * @throws ConflictingNamesException If a node of the same type and name already
+	 *                                   exists
+	 */
+	public void moveDirectory(String sourcePath, String targetPath)
+			throws NotADirectoryException, UnresolvedPathException, FullDirectoryException, ConflictingNamesException {
+		DirectoryNode originalNode = cursor;
+		String originalWorkingDirectory = workingDirectory;
+		DirectoryNode removedNode = null;
+		// Get node to move
+		String[] sourcePathArray = sourcePath.split("/");
+		String sourcePathNode = sourcePathArray[sourcePathArray.length - 1];
+		sourcePathArray[sourcePathArray.length - 1] = "";
+		try {
+			// Go to node's parent and remove it
+			changeDirectory(String.join("/", sourcePathArray));
+			removedNode = cursor.removeChild(sourcePathNode);
+			// Go to targetPath and add node as child
+			cursor = originalNode;
+			changeDirectory(targetPath);
+			cursor.addChild(removedNode);
+			// Go back to original position
+			cursor = originalNode;
+			workingDirectory = originalWorkingDirectory;
+		} catch (Exception e) {
+			// Go back to original position
+			cursor = originalNode;
+			workingDirectory = originalWorkingDirectory;
+			// If node was removed while trying, restore node
+			changeDirectory(String.join("/", sourcePathArray));
+			cursor.addChild(removedNode);
+			// Go back to original position
+			cursor = originalNode;
+			workingDirectory = originalWorkingDirectory;
+			// Handle errors
+			if (e instanceof NotADirectoryException) {
+				throw new NotADirectoryException("The target path does not resolve to a directory.");
+			} else if (e instanceof UnresolvedPathException) {
+				throw new UnresolvedPathException("The target or source path is invalid");
+			} else if (e instanceof FullDirectoryException) {
+				throw new FullDirectoryException("The directory at the target path is full.");
+			} else if (e instanceof ConflictingNamesException) {
+				throw new ConflictingNamesException("You cannot have two nodes of the same type and name.");
+			}
+
+		}
 	}
 
 	/**

@@ -116,14 +116,19 @@ public class DirectoryNode {
 	 * </dl>
 	 * 
 	 * @param node The node to add
-	 * @throws NotADirectoryException if this instance of DirectoryNode is a file
-	 * @throws FullDirectoryException if this instance of DirectoryNode is full
+	 * @throws NotADirectoryException    if this instance of DirectoryNode is a file
+	 * @throws FullDirectoryException    if this instance of DirectoryNode is full
+	 * @throws ConflictingNamesException if a node of the same type and name already
+	 *                                   exists
 	 */
-	public void addChild(DirectoryNode node) throws NotADirectoryException, FullDirectoryException {
+	public void addChild(DirectoryNode node)
+			throws NotADirectoryException, FullDirectoryException, ConflictingNamesException {
 		if (childrenCount == MAX_CHILDREN) {
 			throw new FullDirectoryException("No more children can be added to this node.");
 		} else if (isFile) {
 			throw new NotADirectoryException("A file cannot have children.");
+		} else if (getChildIndex(node.getName()) != -1) {
+			throw new ConflictingNamesException("You cannot have two files or two directories with the same name.");
 		}
 		children[childrenCount] = node;
 		childrenNames[childrenCount] = node.getName();
@@ -132,18 +137,35 @@ public class DirectoryNode {
 	}
 
 	/**
+	 * Removes a child of this DirectoryNode instance, if found.
+	 * 
+	 * @param name The name of the node to remove
+	 * @throws UnresolvedPathException if the node doesn't exist
+	 * @return The removed node
+	 */
+	public DirectoryNode removeChild(String name) throws UnresolvedPathException {
+		DirectoryNode removedNode = null;
+		int index = getChildIndex(name);
+		if (index == -1) {
+			throw new UnresolvedPathException("That node does not exist.");
+		}
+		removedNode = children[index];
+		for (int i = index + 1; i < childrenCount + 1; i++) {
+			children[i - 1] = children[i];
+		}
+		childrenCount -= 1;
+		return removedNode;
+	}
+
+	/**
 	 * Gets the index of specified child, if it exists.
 	 * 
 	 * @param name The name of the child
-	 * @throws NotADirectoryException if this instance of DirectoryNode is a file
 	 * @return The index of the child, or -1 if not found.
 	 */
-	public int getChildIndex(String name) throws NotADirectoryException {
-		if (isFile) {
-			throw new NotADirectoryException("A file cannot have children.");
-		}
+	public int getChildIndex(String name) {
 		int index = -1;
-		for (int i = 0; i < children.length; i++) {
+		for (int i = 0; i < childrenCount; i++) {
 			if (children[i].getName().equals(name)) {
 				index = i;
 				break;
