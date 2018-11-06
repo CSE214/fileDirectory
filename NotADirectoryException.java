@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * <code>NotADirectoryException</code> is thrown when the user attempts to move

@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * <code>ConflictingNamesException</code> is thrown when there is an attempt to

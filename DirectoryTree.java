@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * The <code>DirectoryTree</code> class models a directory system using trees.
@@ -266,6 +265,64 @@ public class DirectoryTree {
 			}
 
 		}
+	}
+
+	/**
+	 * Substep in recursion for the find method.
+	 * 
+	 * @param name        Name of the desired file
+	 * @param currentNode The current node in the tree traversal
+	 * @param currentPath The current path in the tree traversal
+	 * @return The path if a match was found, else return the empty string
+	 */
+	public String find(String name, DirectoryNode currentNode, String currentPath) {
+		// Check if current node has a match
+		if (name.equals(currentNode.getName()))
+			return currentPath;
+		// Check if any children node has a match
+		DirectoryNode[] children = currentNode.getChildren();
+		for (int i = 0; i < currentNode.getChildrenCount(); i++) {
+			String result = find(name, children[i], currentPath + "/" + children[i].getName());
+			if (!result.equals(""))
+				return result;
+		}
+		// Else, search failed for this tree: return empty string
+		return "";
+	}
+
+	/**
+	 * Substep in recursion for the printAllFound method.
+	 * 
+	 * @param name        Name of the desired file
+	 * @param currentNode The current node in the tree traversal
+	 * @param currentPath The current path in the tree traversal
+	 * @return The path if a match was found, else return the empty string
+	 */
+	public void printAllFound(String name, DirectoryNode currentNode, String currentPath) {
+		// Check if current node has a match
+		if (name.equals(currentNode.getName()))
+			System.out.println(currentPath);
+		// Check if any children node has a match
+		DirectoryNode[] children = currentNode.getChildren();
+		for (int i = 0; i < currentNode.getChildrenCount(); i++) {
+			printAllFound(name, children[i], currentPath + "/" + children[i].getName());
+		}
+	}
+
+	/**
+	 * Prints all paths that resolve to a file with the specified name.
+	 * 
+	 * @param name Name of the desired file
+	 */
+	public void printAllFound(String name) {
+		printAllFound(name, root, "root");
+	}
+
+	/**
+	 * Returns a string containing a path to the specified directory.
+	 */
+	public String find(String name) {
+		return find(name, root, "root");
 	}
 
 	/**

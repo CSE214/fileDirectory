@@ -1,4 +1,3 @@
-package fileDirectory;
 
 import java.util.Scanner;
 
@@ -69,13 +68,13 @@ public class BashTerminal {
 		try {
 			directoryTree.makeFile(name);
 		} catch (NotADirectoryException e) {
-			System.out.println("You can only add files to a directory");
+			System.out.println("ERROR: You can only add files to a directory.");
 		} catch (FullDirectoryException e) {
-			System.out.println("This directory is already full.");
+			System.out.println("ERROR: This directory is already full.");
 		} catch (IllegalArgumentException e) {
-			System.out.println("That is not a valid file name.");
+			System.out.println("ERROR: That is not a valid file name.");
 		} catch (ConflictingNamesException e) {
-			System.out.println("There cannot be two directories or two files with the same name.");
+			System.out.println("ERROR: There cannot be two directories or two files with the same name.");
 		}
 	}
 
@@ -93,13 +92,13 @@ public class BashTerminal {
 		try {
 			directoryTree.makeDirectory(name);
 		} catch (NotADirectoryException e) {
-			System.out.println("You can only add files to a directory");
+			System.out.println("ERROR: You can only add files to a directory.");
 		} catch (FullDirectoryException e) {
-			System.out.println("This directory is already full.");
+			System.out.println("ERROR: This directory is already full.");
 		} catch (IllegalArgumentException e) {
-			System.out.println("That is not a valid file name.");
+			System.out.println("ERROR: That is not a valid file name.");
 		} catch (ConflictingNamesException e) {
-			System.out.println("There cannot be two directories or two files with the same name.");
+			System.out.println("ERROR: There cannot be two directories or two files with the same name.");
 		}
 	}
 
@@ -138,7 +137,11 @@ public class BashTerminal {
 	 * </dl>
 	 */
 	private static void moveToParent() {
-		directoryTree.goToParent();
+		if (directoryTree.getCursor().equals(directoryTree.getRoot())) {
+			System.out.println("ERROR: Already at the root directory");
+		} else {
+			directoryTree.goToParent();
+		}
 	}
 
 	/**
@@ -171,6 +174,15 @@ public class BashTerminal {
 			System.out.println("The directory at the target path is already full.");
 		} catch (ConflictingNamesException e) {
 			System.out.println("There cannot be two directories or two files with the same name.");
+		}
+	}
+
+	private static void find(String name) {
+		String result = directoryTree.find(name);
+		if (result.equals("")) {
+			System.out.println("ERROR: No such file exists.");
+		} else {
+			directoryTree.printAllFound(name);
 		}
 	}
 
@@ -213,6 +225,8 @@ public class BashTerminal {
 				moveToDirectory(command.split(" ")[1].trim());
 			} else if (command.matches("mv\\s+[^\\s]+\\s+[^\\s]+")) {
 				moveDirectory(command.split(" ")[1].trim(), command.split(" ")[2].trim());
+			} else if (command.matches("find\\s+[^/\\s]+")) {
+				find(command.split(" ")[1].trim());
 			} else {
 				System.out.println("That is not a valid command.");
 			}

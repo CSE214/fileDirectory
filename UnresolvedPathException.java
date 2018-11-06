@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * <code>UnresolvedPathException</code> is thrown when the passed in path cannot

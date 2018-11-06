@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * <code>FullDirectoryException</code> is thrown when the current

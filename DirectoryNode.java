@@ -1,4 +1,3 @@
-package fileDirectory;
 
 /**
  * The <code>DirectoryNode</code> class represents a node in the file tree.
